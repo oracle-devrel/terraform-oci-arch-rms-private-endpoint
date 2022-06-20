@@ -1,0 +1,170 @@
+# Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+
+title: "Create a Private Endpoint from Resource Manager and do Remote-Exec in Private Instance."
+stackDescription: "Create a Private Endpoint from Resource Manager and do Remote-Exec in Private Instance."
+schemaVersion: 1.1.0
+version: 1.0
+locale: "en"
+
+
+variableGroups:
+- title: "General Configuration"
+  visible: false
+  variables:
+    - compartment_ocid
+    - tenancy_ocid
+    - region
+    - release
+    - availability_domain_number
+
+- title: "Required Configuration"
+  visible: true  
+  variables:
+    - availability_domain_name
+    - private_endpoint_display_name
+    - show_advanced
+
+- title: "Networking Optional Configuration"
+  visible: 
+      and:
+        - show_advanced
+  variables:
+    - vcn_cidr
+    - vcn_display_name
+    - subnet_display_name
+
+- title: "Compute Optional Configuration"
+  visible: 
+      and:
+        - show_advanced
+  variables:
+    - instance_display_name
+    - instance_shape
+    - instance_shape_config_ocpus
+    - instance_shape_config_memory_in_gbs
+    - instance_os
+    - linux_os_version
+
+variables:
+
+  show_advanced:
+    type: boolean
+    title: "Show advanced options?"
+    description: "Shows advanced options."
+    visible: true
+    default: false  
+
+  compartment_ocid:
+    type: oci:identity:compartment:id
+    required: true
+    title: "Compartment"
+    description: "Choose compartment where you want to create the solution resources"
+
+  region:
+    type: oci:identity:region:name
+    required: true
+    title: "Region"
+    description: "Choose region where you want to deploy the resources defined by this stack."
+
+  availability_domain_name:
+    type: oci:identity:availabilitydomain:name
+    dependsOn:
+      compartmentId: compartment_ocid
+    required: true
+    title: "Availability Domain"
+    description: "Choose availability Domain to be chosen for deploy of Redis compute instances."
+
+  vcn_display_name:
+    type: string
+    required: true
+    title: "VCN Display Name"
+    description: "Define VCN Display Name."
+
+  subnet_display_name:
+    type: string
+    required: true
+    title: "Subnet Display Name"
+    description: "Define Subnet Display Name."
+
+  instance_display_name:
+    type: string
+    required: true
+    title: "Private Instance Display Name"
+    description: "Define Private Instance Display Name."
+
+  private_endpoint_display_name:
+    type: string
+    required: true
+    title: "ORM/RMS Private Endpoint Display Name"
+    description: "Define ORM/RMS Private Endpoint Display Name."
+  
+  vcn_cidr:
+    type: string
+    required: false
+    pattern: "^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\/(3[0-2]|[1-2]?[0-9])$"
+    title: "VCN CIDR"
+    description: "Define VCN CIDR block where you want to create the solution resources."
+
+  instance_shape:
+    type: oci:core:instanceshape:name
+    required: false
+    title: "Instance Shape"
+    description: "Choose Instance Shape for Private Compute Instance."
+    default: "VM.Standard.E4.Flex"
+    dependsOn:
+      compartmentId: compartment_ocid
+
+  instance_os:
+    type: enum
+    title: "Instance OS"
+    description: "Choose an Operating System that determines the operating system for Private Compute Instance."
+    enum:
+      - "Oracle Linux"
+    required: false
+
+  linux_os_version:
+    type: enum
+    title: "OS version"
+    description: "Choose Operating System version for Private Compute Instance."
+    enum:
+      - "8"
+    required: false
+
+  instance_shape_config_ocpus:
+    type: integer
+    minimum: 1
+    maximum: 64
+    title: "Flex Shape OCPUs"
+    description: "Choose number of OCPUs for Flex Shape."
+    visible:
+      and:
+        - or:
+          - eq:
+            - instance_shape 
+            - "VM.Standard.E3.Flex"
+          - eq:
+            - instance_shape 
+            - "VM.Standard.E4.Flex"
+          - eq:
+            - instance_shape 
+            - "VM.Standard.A1.Flex"
+
+  instance_shape_config_memory_in_gbs:
+    type: integer
+    minimum: 1
+    maximum: 1024
+    title: "Flex Shape Memory (GB)"
+    description: "Choose number GB for Flex Shape Memory."
+    visible:
+      and:
+        - or:
+          - eq:
+            - instance_shape 
+            - "VM.Standard.E3.Flex"
+          - eq:
+            - instance_shape 
+            - "VM.Standard.E4.Flex"
+          - eq:
+            - instance_shape 
+            - "VM.Standard.A1.Flex"

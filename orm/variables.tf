@@ -30,7 +30,11 @@ variable "private_endpoint_display_name" {
 }
 
 variable "availability_domain_name" {
-  default = null
+  default = ""
+}
+
+variable "availability_domain_number" {
+  default = ""
 }
 
 ## Instance
